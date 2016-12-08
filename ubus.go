@@ -1,11 +1,13 @@
 package ubus
 
+import "github.com/satori/go.uuid"
+
 type Ubus struct {
 	q []eventInfo
 }
 
 type eventInfo struct {
-	ID    string
+	ID    uuid.UUID
 	Token string
 	Cb    func(interface{})
 	Del   bool
@@ -14,7 +16,7 @@ type eventInfo struct {
 type destroyCb func()
 
 func (u *Ubus) On(token string, cb func(interface{})) destroyCb {
-	id := "1"
+	id := uuid.NewV4()
 
 	u.q = append(u.q, eventInfo{
 		ID:    id,
@@ -24,16 +26,16 @@ func (u *Ubus) On(token string, cb func(interface{})) destroyCb {
 	})
 
 	return func() {
-		for _, v := range u.q {
+		for i, v := range u.q {
 			if v.ID == id {
-				// todo
+				u.q = append(u.q[:i], u.q[i+1:]...)
 			}
 		}
 	}
 }
 
 func (u *Ubus) Once(token string, cb func(interface{})) {
-	id := "1"
+	id := uuid.NewV4()
 
 	u.q = append(u.q, eventInfo{
 		ID:    id,
@@ -44,9 +46,13 @@ func (u *Ubus) Once(token string, cb func(interface{})) {
 }
 
 func (u *Ubus) Emit(token string, info interface{}) {
-	for _, v := range u.q {
+	for i, v := range u.q {
 		if token == v.Token {
 			v.Cb(info)
+
+			if v.Del {
+				u.q = append(u.q[:i], u.q[i+1:]...)
+			}
 		}
 	}
 }
