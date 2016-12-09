@@ -16,7 +16,7 @@ func TestOn(t *testing.T) {
 		u.Emit("a", nil)
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 	})
 
@@ -36,11 +36,11 @@ func TestOn(t *testing.T) {
 		u.Emit("a", "1")
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 
 		if param != expectedParam {
-			t.Errorf("Expected %v to equal %v", param, expectedParam)
+			t.Errorf("Expected %s to equal %s", param, expectedParam)
 		}
 	})
 
@@ -65,15 +65,15 @@ func TestOn(t *testing.T) {
 		u.Emit("a", "1")
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 
 		if param != expectedParam {
-			t.Errorf("Expected %v to equal %v", param, expectedParam)
+			t.Errorf("Expected %s to equal %s", param, expectedParam)
 		}
 
 		if timesCalled != expectedCalls {
-			t.Errorf("Expected number of calls to be %v, but got %v", expectedCalls, timesCalled)
+			t.Errorf("Expected number of calls to be %d, but got %d", expectedCalls, timesCalled)
 		}
 	})
 }
@@ -92,7 +92,7 @@ func TestOnce(t *testing.T) {
 		u.Emit("a", nil)
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 	})
 
@@ -112,11 +112,11 @@ func TestOnce(t *testing.T) {
 		u.Emit("a", "1")
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 
 		if param != expectedParam {
-			t.Errorf("Expected %v to equal %v", param, expectedParam)
+			t.Errorf("Expected %s to equal %s", param, expectedParam)
 		}
 	})
 
@@ -141,15 +141,15 @@ func TestOnce(t *testing.T) {
 		u.Emit("a", "1")
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 
 		if param != expectedParam {
-			t.Errorf("Expected %v to equal %v", param, expectedParam)
+			t.Errorf("Expected %s to equal %s", param, expectedParam)
 		}
 
 		if timesCalled != expectedCalls {
-			t.Errorf("Expected number of calls to be %v, but got %v", expectedCalls, timesCalled)
+			t.Errorf("Expected number of calls to be %d, but got %d", expectedCalls, timesCalled)
 		}
 	})
 }
@@ -168,7 +168,7 @@ func TestEmit(t *testing.T) {
 		u.Emit("a", nil)
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 	})
 
@@ -188,11 +188,11 @@ func TestEmit(t *testing.T) {
 		u.Emit("a", "1")
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 
 		if param != expectedParam {
-			t.Errorf("Expected %v to equal %v", param, expectedParam)
+			t.Errorf("Expected %s to equal %s", param, expectedParam)
 		}
 	})
 
@@ -217,15 +217,182 @@ func TestEmit(t *testing.T) {
 		u.Emit("a", "1")
 
 		if called != expectedVal {
-			t.Errorf("Expected %v to equal %v", called, expectedVal)
+			t.Errorf("Expected %t to equal %t", called, expectedVal)
 		}
 
 		if param != expectedParam {
-			t.Errorf("Expected %v to equal %v", param, expectedParam)
+			t.Errorf("Expected %s to equal %s", param, expectedParam)
 		}
 
 		if timesCalled != expectedCalls {
-			t.Errorf("Expected number of calls to be %v, but got %v", expectedCalls, timesCalled)
+			t.Errorf("Expected number of calls to be %d, but got %d", expectedCalls, timesCalled)
+		}
+	})
+
+	t.Run("multiple_emits", func(t *testing.T) {
+		u := NewBus()
+
+		aCalled := false
+		aCalledTimes := 0
+		expectedACalled := true
+		expectedACalledTimes := 1
+
+		bCalled := false
+		bCalledTimes := 0
+		expectedBCalled := true
+		expectedBCalledTimes := 1
+
+		cCalled := false
+		cCalledTimes := 0
+		expectedCCalled := true
+		expectedCCalledTimes := 1
+
+		u.On("a", func(_ interface{}) {
+			aCalled = true
+			aCalledTimes += 1
+		})
+
+		u.On("b", func(_ interface{}) {
+			bCalled = true
+			bCalledTimes += 1
+		})
+
+		u.On("c", func(_ interface{}) {
+			cCalled = true
+			cCalledTimes += 1
+		})
+
+		u.Emit("a", nil)
+		u.Emit("b", nil)
+		u.Emit("c", nil)
+
+		if aCalled != expectedACalled {
+			t.Errorf("Expected a to have been called, but it wasn't. %t != %t", aCalled, expectedACalled)
+		}
+
+		if aCalledTimes != expectedACalledTimes {
+			t.Errorf("Expected a to have been called %d times, but it was called %d.", expectedACalledTimes, aCalledTimes)
+		}
+
+		if bCalled != expectedBCalled {
+			t.Errorf("Expected b to have been called, but it wasn't. %t != %t", bCalled, expectedBCalled)
+		}
+
+		if bCalledTimes != expectedBCalledTimes {
+			t.Errorf("Expected b to have been called %d times, but it was called %d.", expectedBCalledTimes, bCalledTimes)
+		}
+
+		if cCalled != expectedCCalled {
+			t.Errorf("Expected c to have been called, but it wasn't. %t != %t", bCalled, expectedCCalled)
+		}
+
+		if cCalledTimes != expectedCCalledTimes {
+			t.Errorf("Expected c to have been called %d times, but it was called %d.", expectedCCalledTimes, cCalledTimes)
+		}
+	})
+}
+
+func TestOff(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		u := NewBus()
+
+		u.Off([]string{"xyz"})
+	})
+
+	t.Run("simple", func(t *testing.T) {
+		u := NewBus()
+
+		aCalled := false
+		aCalledTimes := 0
+		expectedACalled := true
+		expectedACalledTimes := 1
+
+		u.On("a", func(_ interface{}) {
+			aCalled = true
+			aCalledTimes += 1
+		})
+
+		u.Emit("a", nil)
+		u.Off([]string{"a"})
+		u.Emit("a", nil)
+
+		if aCalled != expectedACalled {
+			t.Errorf("Expected a to have been called, but it wasn't. %t != %t", aCalled, expectedACalled)
+		}
+
+		if aCalledTimes != expectedACalledTimes {
+			t.Errorf("Expected a to have been called %d times, but it was called %d.", expectedACalledTimes, aCalledTimes)
+		}
+	})
+
+	t.Run("multiple_off", func(t *testing.T) {
+		u := NewBus()
+
+		aCalled := false
+		aCalledTimes := 0
+		expectedACalled := true
+		expectedACalledTimes := 1
+
+		bCalled := false
+		bCalledTimes := 0
+		expectedBCalled := true
+		expectedBCalledTimes := 1
+
+		cCalled := false
+		cCalledTimes := 0
+		expectedCCalled := true
+		expectedCCalledTimes := 1
+
+		u.On("a", func(_ interface{}) {
+			aCalled = true
+			aCalledTimes += 1
+		})
+
+		u.On("b", func(_ interface{}) {
+			bCalled = true
+			bCalledTimes += 1
+		})
+
+		u.On("c", func(_ interface{}) {
+			cCalled = true
+			cCalledTimes += 1
+		})
+
+		u.Emit("a", nil)
+		u.Off([]string{"a"})
+		u.Emit("a", nil)
+		u.Emit("a", nil)
+
+		u.Emit("b", nil)
+		u.Off([]string{"b"})
+		u.Emit("b", nil)
+		u.Emit("b", nil)
+
+		u.Emit("c", nil)
+		u.Off([]string{"c"})
+
+		if aCalled != expectedACalled {
+			t.Errorf("Expected a to have been called, but it wasn't. %t != %t", aCalled, expectedACalled)
+		}
+
+		if aCalledTimes != expectedACalledTimes {
+			t.Errorf("Expected a to have been called %d times, but it was called %d.", expectedACalledTimes, aCalledTimes)
+		}
+
+		if bCalled != expectedBCalled {
+			t.Errorf("Expected b to have been called, but it wasn't. %t != %t", bCalled, expectedBCalled)
+		}
+
+		if bCalledTimes != expectedBCalledTimes {
+			t.Errorf("Expected b to have been called %d times, but it was called %d.", expectedBCalledTimes, bCalledTimes)
+		}
+
+		if cCalled != expectedCCalled {
+			t.Errorf("Expected c to have been called, but it wasn't. %t != %t", bCalled, expectedCCalled)
+		}
+
+		if cCalledTimes != expectedCCalledTimes {
+			t.Errorf("Expected c to have been called %d times, but it was called %d.", expectedCCalledTimes, cCalledTimes)
 		}
 	})
 }

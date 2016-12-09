@@ -57,6 +57,16 @@ func (u *Ubus) Emit(token string, info interface{}) {
 	}
 }
 
+func (u *Ubus) Off(tokens []string) {
+	for _, token := range tokens {
+		for i, ev := range u.q {
+			if ev.Token == token {
+				u.q = append(u.q[:i], u.q[i+1:]...)
+			}
+		}
+	}
+}
+
 func NewBus() *Ubus {
 	return &Ubus{
 		q: []eventInfo{},
