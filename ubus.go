@@ -57,7 +57,7 @@ func (u *Ubus) Emit(token string, info interface{}) {
 	}
 }
 
-func NewUbus() *Ubus {
+func NewBus() *Ubus {
 	return &Ubus{
 		q: []eventInfo{},
 	}
