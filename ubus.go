@@ -3,7 +3,7 @@ package ubus
 import "github.com/satori/go.uuid"
 
 type Ubus struct {
-	q []eventInfo
+	q map[string]eventInfo
 }
 
 type eventInfo struct {
@@ -18,17 +18,17 @@ type destroyCb func()
 func (u *Ubus) On(token string, cb func(interface{})) destroyCb {
 	id := uuid.NewV4()
 
-	u.q = append(u.q, eventInfo{
+	u.q[token] = eventInfo{
 		ID:    id,
 		Token: token,
 		Cb:    cb,
 		Del:   false,
-	})
+	}
 
 	return func() {
-		for i, v := range u.q {
+		for _, v := range u.q {
 			if v.ID == id {
-				u.q = append(u.q[:i], u.q[i+1:]...)
+				delete(u.q, token)
 			}
 		}
 	}
@@ -37,21 +37,21 @@ func (u *Ubus) On(token string, cb func(interface{})) destroyCb {
 func (u *Ubus) Once(token string, cb func(interface{})) {
 	id := uuid.NewV4()
 
-	u.q = append(u.q, eventInfo{
+	u.q[token] = eventInfo{
 		ID:    id,
 		Token: token,
 		Cb:    cb,
 		Del:   true,
-	})
+	}
 }
 
 func (u *Ubus) Emit(token string, info interface{}) {
-	for i, v := range u.q {
+	for _, v := range u.q {
 		if token == v.Token {
 			v.Cb(info)
 
 			if v.Del {
-				u.q = append(u.q[:i], u.q[i+1:]...)
+				delete(u.q, token)
 			}
 		}
 	}
@@ -59,9 +59,9 @@ func (u *Ubus) Emit(token string, info interface{}) {
 
 func (u *Ubus) Off(tokens []string) {
 	for _, token := range tokens {
-		for i, ev := range u.q {
+		for _, ev := range u.q {
 			if ev.Token == token {
-				u.q = append(u.q[:i], u.q[i+1:]...)
+				delete(u.q, token)
 			}
 		}
 	}
@@ -69,6 +69,6 @@ func (u *Ubus) Off(tokens []string) {
 
 func NewBus() *Ubus {
 	return &Ubus{
-		q: []eventInfo{},
+		q: make(map[string]eventInfo),
 	}
 }
